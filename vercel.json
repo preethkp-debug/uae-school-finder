@@ -1,8 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": false,
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/school/:slug*", "destination": "/school.html" }
+    { "source": "/school/:slug*", "destination": "/school.html" },
+    { "source": "/blog", "destination": "/blog/index.html" },
+    { "source": "/blog/", "destination": "/blog/index.html" }
   ],
   "headers": [
     {
@@ -18,6 +21,12 @@
       "source": "/index.html",
       "headers": [
         {"key": "Cache-Control", "value": "public, max-age=0, must-revalidate"}
+      ]
+    },
+    {
+      "source": "/blog/(.*)",
+      "headers": [
+        {"key": "Cache-Control", "value": "public, max-age=3600, must-revalidate"}
       ]
     }
   ]
