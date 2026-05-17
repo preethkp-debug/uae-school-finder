@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title id="page-title">School details · UAE School Finder</title>
-<meta id="page-desc" name="description" content="School profile on UAE School Finder. Curriculum, fees, location, and regulator ratings." />
+<title id="page-title">School details · Schools Compared</title>
+<meta id="page-desc" name="description" content="School profile on Schools Compared. Curriculum, fees, location, and regulator ratings." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
@@ -216,7 +216,7 @@
   <div class="container header-inner">
     <a class="logo" href="/">
       <span class="logo-mark">U</span>
-      <span>UAE School Finder</span>
+      <span>Schools Compared</span>
       <span class="logo-sub">Compare 699 schools & nurseries</span>
     </a>
     <nav class="header-nav">
@@ -230,7 +230,7 @@
 <footer>
   <div class="container footer-inner">
     <div>
-      <strong>UAE School Finder</strong> — Data from public regulator records. Built for parents.
+      <strong>Schools Compared</strong> — Data from public regulator records. Built for parents.
     </div>
     <div class="footer-links">
       <a href="/">Browse all schools</a>
@@ -330,7 +330,7 @@ function buildPage(item) {
     </a>
   `).join('');
 
-  document.title = `${item.n} \u00b7 UAE School Finder`;
+  document.title = `${item.n} \u00b7 Schools Compared`;
   document.getElementById('page-desc').setAttribute('content',
     `${item.n} \u2014 ${item.t} in ${item.ar}, ${item.em}. ` +
     (item.c ? `${item.c} curriculum. ` : '') +
@@ -342,7 +342,7 @@ function buildPage(item) {
     <section class="hero">
       <div class="container">
         <div class="breadcrumb">
-          <a href="/">UAE School Finder</a>
+          <a href="/">Schools Compared</a>
           <span class="sep">\u203a</span>
           <a href="/?em=${encodeURIComponent(item.em)}">${escapeHTML(item.em)}</a>
           <span class="sep">\u203a</span>
@@ -403,11 +403,6 @@ function buildPage(item) {
             <h2>Sources & further reading</h2>
             <p>Profile compiled from publicly available data. For the most current fee schedule, parent reviews, and full inspection report, see the official sources:</p>
             <ul>
-              
-              ${item.auth === 'KHDA' ? '' : ''}
-              ${item.auth === 'ADEK' ? '' : ''}
-              ${item.auth === 'SPEA' ? '' : ''}
-              <li><a href="${mapsURL(item)}" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline;">View on Google Maps</a></li>
             </ul>
           </div>
         </div>
@@ -417,10 +412,10 @@ function buildPage(item) {
             <h3>At a glance</h3>
             <div class="glance-list">${glanceHTML}</div>
             <div class="glance-actions">
-              <a class="action-btn primary" href="${mapsURL(item)}" target="_blank" rel="noopener">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                Open in Google Maps
-              </a>
+              <button class="action-btn primary" type="button" onclick="openEnquiryForm()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Enquire about this school
+              </button>
               
             </div>
           </div>
@@ -431,7 +426,7 @@ function buildPage(item) {
 }
 
 function show404() {
-  document.title = 'School not found · UAE School Finder';
+  document.title = 'School not found · Schools Compared';
   document.getElementById('content').innerHTML = `
     <section class="hero">
       <div class="container">
@@ -503,5 +498,143 @@ function renderCurrentSchool() {
 })();
 
 </script>
+
+<!-- ===== Enquiry form modal ===== -->
+<style>
+.enq-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.55); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 32px 16px; overflow-y: auto; }
+.enq-overlay.show { display: flex; }
+.enq-modal { background: #fff; border-radius: 16px; max-width: 620px; width: 100%; padding: 28px 28px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); position: relative; }
+.enq-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; color: #666; line-height: 1; }
+.enq-modal h2 { margin: 0 0 4px; font-size: 22px; }
+.enq-modal .enq-sub { color: #666; font-size: 13px; margin: 0 0 20px; }
+.enq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.enq-grid .full { grid-column: 1 / -1; }
+.enq-grid label { display: block; font-size: 11px; font-weight: 600; color: #4a5159; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.enq-grid input, .enq-grid select { width: 100%; padding: 9px 11px; border: 1px solid #d6d3cc; border-radius: 8px; font: inherit; font-size: 14px; box-sizing: border-box; }
+.enq-grid input:focus, .enq-grid select:focus { outline: 2px solid #c66b3d; outline-offset: 1px; border-color: #c66b3d; }
+.enq-grid h4 { grid-column: 1 / -1; margin: 14px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 700; }
+.enq-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; padding-top: 18px; border-top: 1px solid #efece6; }
+.enq-actions button { padding: 10px 20px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+.enq-actions .submit { background: #0f1419; color: #fff; }
+.enq-actions .submit:disabled { opacity: 0.5; cursor: wait; }
+.enq-actions .cancel { background: transparent; color: #4a5159; border-color: #d6d3cc; }
+.enq-msg { padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; }
+.enq-msg.show { display: block; }
+.enq-msg.error { background: #f1d4d4; color: #b14747; }
+.enq-msg.success { background: #d9ecdf; color: #2f7a4d; }
+@media (max-width: 520px) { .enq-grid { grid-template-columns: 1fr; } }
+</style>
+<div class="enq-overlay" id="enq-overlay" onclick="if(event.target===this)closeEnquiryForm()">
+  <div class="enq-modal">
+    <button class="enq-close" type="button" onclick="closeEnquiryForm()">&times;</button>
+    <h2 id="enq-title">Enquire about this school</h2>
+    <p class="enq-sub">Fill in the form and the school will be in touch. Your details are sent to <strong>future@schoolscompared.org</strong>.</p>
+    <div class="enq-msg" id="enq-msg"></div>
+    <form id="enq-form" onsubmit="submitEnquiry(event)">
+      <div class="enq-grid">
+        <h4 style="margin-top:0">Student</h4>
+        <div><label>First name *</label><input name="student_first" required></div>
+        <div><label>Last name *</label><input name="student_last" required></div>
+        <h4>Parent / Guardian</h4>
+        <div><label>First name *</label><input name="parent_first" required></div>
+        <div><label>Last name *</label><input name="parent_last" required></div>
+        <h4>Contact</h4>
+        <div><label>Email *</label><input name="email" type="email" required></div>
+        <div><label>Confirm email *</label><input name="email_confirm" type="email" required></div>
+        <div><label>Phone *</label><input name="phone" type="tel" required placeholder="+971 50 123 4567"></div>
+        <div><label>City</label><input name="city"></div>
+        <h4>Application</h4>
+        <div class="full"><label>School</label><input name="school_name" id="enq-school" readonly style="background:#f4f1ed"></div>
+        <div><label>Academic year *</label><select name="academic_year" required><option value="">Select…</option><option>2026/2027</option><option>2027/2028</option><option>2028/2029</option></select></div>
+        <div><label>Curriculum</label><input name="curriculum" id="enq-curriculum" placeholder="e.g., UK, US, IB, CBSE"></div>
+        <div><label>Grade / Year *</label><select name="grade_year" required><option value="">Select…</option><option>FS1 / Pre-K</option><option>FS2 / KG1</option><option>Year 1 / KG2</option><option>Year 2 / Grade 1</option><option>Year 3 / Grade 2</option><option>Year 4 / Grade 3</option><option>Year 5 / Grade 4</option><option>Year 6 / Grade 5</option><option>Year 7 / Grade 6</option><option>Year 8 / Grade 7</option><option>Year 9 / Grade 8</option><option>Year 10 / Grade 9</option><option>Year 11 / Grade 10</option><option>Year 12 / Grade 11</option><option>Year 13 / Grade 12</option></select></div>
+      </div>
+      <div class="enq-actions">
+        <button type="button" class="cancel" onclick="closeEnquiryForm()">Cancel</button>
+        <button type="submit" class="submit" id="enq-submit">Submit enquiry</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+// ===== ENQUIRY FORM CONFIG — paste your Supabase credentials below =====
+window.SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';        // e.g. https://abcd1234.supabase.co
+window.SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY';    // long eyJ... JWT
+window.ENQUIRY_NOTIFY_EMAIL = 'future@schoolscompared.org';
+
+function openEnquiryForm() {
+  var slug = (typeof getSlugFromPath === 'function') ? getSlugFromPath() : null;
+  var item = (typeof BY_SLUG !== 'undefined' && slug) ? BY_SLUG[slug] : null;
+  if (!item) { alert('School not found.'); return; }
+  document.getElementById('enq-school').value = item.n;
+  document.getElementById('enq-curriculum').value = item.c || '';
+  document.getElementById('enq-title').textContent = 'Enquire about ' + item.n;
+  window.__enqItem = item;
+  document.getElementById('enq-msg').classList.remove('show');
+  document.getElementById('enq-overlay').classList.add('show');
+  setTimeout(function(){ document.querySelector('#enq-form input[name=student_first]').focus(); }, 100);
+}
+function closeEnquiryForm() {
+  document.getElementById('enq-overlay').classList.remove('show');
+  document.getElementById('enq-form').reset();
+}
+async function submitEnquiry(ev) {
+  ev.preventDefault();
+  var msg = document.getElementById('enq-msg');
+  var btn = document.getElementById('enq-submit');
+  msg.classList.remove('show', 'error', 'success');
+  
+  var form = ev.target;
+  var data = {};
+  new FormData(form).forEach(function(v,k){ data[k] = String(v).trim(); });
+  
+  if (data.email !== data.email_confirm) {
+    msg.textContent = 'Email and Confirm email do not match.';
+    msg.classList.add('show', 'error');
+    return;
+  }
+  delete data.email_confirm;
+  
+  var item = window.__enqItem || {};
+  data.school_slug = item.slug || '';
+  data.school_name = item.n || data.school_name;
+  data.user_agent = (navigator.userAgent || '').slice(0, 200);
+  
+  if (!window.SUPABASE_URL || window.SUPABASE_URL.indexOf('PASTE_') === 0) {
+    msg.textContent = 'Form is not yet wired to a backend. Your details have been logged to the browser console.';
+    msg.classList.add('show', 'error');
+    console.log('Enquiry (no backend):', data);
+    return;
+  }
+  
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    var resp = await fetch(window.SUPABASE_URL + '/rest/v1/enquiries', {
+      method: 'POST',
+      headers: {
+        'apikey': window.SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + window.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!resp.ok) {
+      var errTxt = await resp.text();
+      throw new Error(resp.status + ': ' + errTxt.slice(0, 200));
+    }
+    msg.textContent = 'Thank you — your enquiry has been received. The school will be in touch.';
+    msg.classList.add('show', 'success');
+    form.reset();
+    setTimeout(function(){ closeEnquiryForm(); }, 2400);
+  } catch (e) {
+    msg.textContent = 'Could not submit: ' + e.message;
+    msg.classList.add('show', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit enquiry';
+  }
+}
+</script>
+
 </body>
 </html>
