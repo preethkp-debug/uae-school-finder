@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Schools Compared · Compare 699 schools & nurseries</title>
 <meta name="description" content="Search, filter and compare 699 K-12 private schools and nurseries across the UAE. Curriculum, fees, regulator ratings, locations." />
@@ -70,6 +71,7 @@
     display: flex; align-items: center; gap: 10px;
     font-weight: 700; font-size: 17px; letter-spacing: -0.02em;
   }
+  .logo-img { height: 22px; width: auto; display: block; color: var(--ink); }
   .logo-mark {
     width: 30px; height: 30px; border-radius: 8px;
     background: var(--ink); color: #fff;
@@ -420,14 +422,20 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+<meta property="og:image" content="https://www.schoolscompared.org/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Schools Compared — Compare 699 UAE schools and nurseries">
+<meta property="og:description" content="Search, filter and compare 699 K-12 private schools and nurseries across the UAE. Curriculum, fees, regulator ratings, locations.">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 
 <header class="site">
   <div class="container header-inner">
-    <a class="logo" href="/">
-      <span class="logo-mark">SC</span>
-      <span>Schools Compared</span>
+    <a class="logo" href="/" aria-label="Schools Compared">
+      <img src="/logo.svg" alt="Schools Compared" class="logo-img" height="22">
       <span class="logo-sub">Compare 699 schools &amp; nurseries</span>
     </a>
     <nav class="header-nav">

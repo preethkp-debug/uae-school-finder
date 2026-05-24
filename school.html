@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title id="page-title">School details · Schools Compared</title>
 <meta id="page-desc" name="description" content="School profile on Schools Compared. Curriculum, fees, location, and regulator ratings." />
@@ -55,6 +56,7 @@
   }
   .header-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 16px; }
   .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+  .logo-img { height: 22px; width: auto; display: block; color: var(--ink); }
   .logo-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--ink); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
   .logo-sub { color: var(--ink-soft); font-weight: 500; font-size: 14px; border-left: 1px solid var(--ink-line); padding-left: 12px; }
   @media (max-width: 720px) { .logo-sub { display: none; } }
@@ -209,15 +211,21 @@
   .not-found h2 { font-family: 'Instrument Serif', serif; font-size: 36px; margin-bottom: 8px; }
   .not-found p { color: var(--ink-soft); margin-bottom: 18px; }
 </style>
+<meta property="og:image" content="https://www.schoolscompared.org/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:title" content="School details — Schools Compared">
+<meta property="og:description" content="School profile on Schools Compared. Curriculum, fees, location, and regulator ratings.">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 
 <header>
   <div class="container header-inner">
-    <a class="logo" href="/">
-      <span class="logo-mark">U</span>
-      <span>Schools Compared</span>
-      <span class="logo-sub">Compare 699 schools & nurseries</span>
+    <a class="logo" href="/" aria-label="Schools Compared">
+      <img src="/logo.svg" alt="Schools Compared" class="logo-img" height="22">
+      <span class="logo-sub">Compare 699 schools &amp; nurseries</span>
     </a>
     <nav class="header-nav">
       <a class="pill" href="/">All schools</a>
