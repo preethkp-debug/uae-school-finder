@@ -93,6 +93,10 @@
     background: linear-gradient(180deg, var(--bg-cream) 0%, #fff 100%);
     border-bottom: 1px solid var(--ink-hairline);
   }
+.school-hero-img { width:100%; height:360px; position:relative; overflow:hidden; background:var(--bg-cream-2); border-bottom:1px solid var(--ink-hairline); }
+.school-hero-img img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
+.school-hero-img.empty { display:none; }
+.school-hero-img .credit { position:absolute; bottom:10px; right:14px; font-size:11px; color:rgba(255,255,255,0.95); background:rgba(15,20,25,0.45); padding:4px 10px; border-radius:999px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
   .breadcrumb { color: var(--ink-soft); font-size: 13px; margin-bottom: 18px; }
   .breadcrumb a:hover { color: var(--ink); text-decoration: underline; }
   .breadcrumb .sep { margin: 0 8px; color: var(--ink-muted); }
@@ -347,6 +351,7 @@ function buildPage(item) {
   );
 
   document.getElementById('content').innerHTML = `
+    <div class="school-hero-img" id="school-hero-img"><img src="/school-photos/${encodeURIComponent(item.slug)}.jpg" alt="${escapeHTML(item.n)} building" loading="eager" onerror="document.getElementById('school-hero-img').classList.add('empty')"><span class="credit">${escapeHTML(item.credit || ('Photo from ' + (item.urlHost || 'school website')))}</span></div>
     <section class="hero">
       <div class="container">
         <div class="breadcrumb">
