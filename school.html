@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 
   :root {
@@ -97,6 +98,12 @@
 .school-hero-img img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
 .school-hero-img.empty { display:none; }
 .school-hero-img .credit { position:absolute; bottom:10px; right:14px; font-size:11px; color:rgba(255,255,255,0.95); background:rgba(15,20,25,0.45); padding:4px 10px; border-radius:999px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.qc-label { display:flex; align-items:center; gap:6px; }
+.qc-label svg { width:14px; height:14px; flex:none; color:var(--ink-muted); }
+.school-map { height:340px; border-radius:12px; overflow:hidden; background:var(--bg-cream-2); border:1px solid var(--ink-hairline); }
+.map-credit { font-size:12px; color:var(--ink-muted); margin-top:8px; }
+.map-credit a { color:var(--accent); }
+
   .breadcrumb { color: var(--ink-soft); font-size: 13px; margin-bottom: 18px; }
   .breadcrumb a:hover { color: var(--ink); text-decoration: underline; }
   .breadcrumb .sep { margin: 0 8px; color: var(--ink-muted); }
@@ -388,22 +395,28 @@ function buildPage(item) {
 
             <div class="quick-contact">
               <div class="qc-item">
-                <div class="qc-label">Curriculum</div>
+                <div class="qc-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Curriculum</div>
                 <div class="qc-value ${item.c ? '' : 'muted'}">${escapeHTML(item.c || 'Not available')}</div>
               </div>
               <div class="qc-item">
-                <div class="qc-label">Phase</div>
+                <div class="qc-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Phase</div>
                 <div class="qc-value ${item.ph ? '' : 'muted'}">${escapeHTML(item.ph || 'Not available')}</div>
               </div>
               <div class="qc-item">
-                <div class="qc-label">Annual Fees (AED)</div>
+                <div class="qc-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Annual Fees (AED)</div>
                 <div class="qc-value ${fee_clean ? '' : 'muted'}">${escapeHTML(fee_clean || 'Not available')}</div>
               </div>
               <div class="qc-item">
-                <div class="qc-label">Latest Rating</div>
+                <div class="qc-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Latest Rating</div>
                 <div class="qc-value ${item.r ? '' : 'muted'}">${escapeHTML(item.r || 'Not available')}</div>
               </div>
             </div>
+          </div>
+
+          <div class="section-card">
+            <h2>Location</h2>
+            <div class="school-map" id="school-map" data-q="${encodeURIComponent(item.n + ' ' + item.ar + ' ' + item.em.split(' (')[0] + ' UAE')}"></div>
+            <div class="map-credit">Approximate location. <a href="${mapsURL(item)}" target="_blank" rel="noopener">Open in Google Maps</a> for directions.</div>
           </div>
 
           <div class="section-card">
@@ -436,6 +449,25 @@ function buildPage(item) {
       </div>
     </main>
   `;
+
+  // --- Initialize OpenStreetMap (Leaflet) for the school location ---
+  if (window.L) {
+    const mapEl = document.getElementById('school-map');
+    if (mapEl) {
+      const q = mapEl.dataset.q;
+      fetch('https://nominatim.openstreetmap.org/search?q=' + q + '&format=json&limit=1', { headers: { 'Accept': 'application/json' } })
+        .then(r => r.json())
+        .then(arr => {
+          if (!arr || !arr[0]) { mapEl.style.display = 'none'; return; }
+          const lat = parseFloat(arr[0].lat), lng = parseFloat(arr[0].lon);
+          const map = L.map(mapEl, { scrollWheelZoom: false }).setView([lat, lng], 14);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(map);
+          L.marker([lat, lng]).addTo(map);
+        })
+        .catch(() => { mapEl.style.display = 'none'; });
+    }
+  }
+
 }
 
 function show404() {
@@ -649,5 +681,6 @@ async function submitEnquiry(ev) {
 }
 </script>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>
