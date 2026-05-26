@@ -97,7 +97,6 @@
 .school-hero-img { width:100%; height:360px; position:relative; overflow:hidden; background:var(--bg-cream-2); border-bottom:1px solid var(--ink-hairline); }
 .school-hero-img img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
 .school-hero-img.empty { display:none; }
-.school-hero-img .credit { position:absolute; bottom:10px; right:14px; font-size:11px; color:rgba(255,255,255,0.95); background:rgba(15,20,25,0.45); padding:4px 10px; border-radius:999px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
 .qc-label { display:flex; align-items:center; gap:6px; }
 .qc-label svg { width:14px; height:14px; flex:none; color:var(--ink-muted); }
 .school-map { height:340px; border-radius:12px; overflow:hidden; background:var(--bg-cream-2); border:1px solid var(--ink-hairline); }
@@ -358,7 +357,7 @@ function buildPage(item) {
   );
 
   document.getElementById('content').innerHTML = `
-    <div class="school-hero-img" id="school-hero-img"><img src="/school-photos/${encodeURIComponent(item.slug)}.jpg" alt="${escapeHTML(item.n)} building" loading="eager" onerror="document.getElementById('school-hero-img').classList.add('empty')"><span class="credit">${escapeHTML(item.credit || ('Photo from ' + (item.urlHost || 'school website')))}</span></div>
+    <div class="school-hero-img" id="school-hero-img"><img src="/school-photos/${encodeURIComponent(item.slug)}.jpg" alt="${escapeHTML(item.n)} building" loading="eager" onerror="document.getElementById('school-hero-img').classList.add('empty')"></div>
     <section class="hero">
       <div class="container">
         <div class="breadcrumb">
