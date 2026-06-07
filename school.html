@@ -478,10 +478,17 @@ function buildPage(item) {
           </form>
         </div>
       </section>
+
+      <section class="rev-section container" id="grev-section" style="display:none">
+        <h2 class="rev-h2">Google reviews</h2>
+        <div class="rev-summary" id="grev-summary"></div>
+        <div class="rev-list" id="grev-list"></div>
+        <div class="grev-foot" id="grev-foot"></div>
+      </section>
     </main>
   `;
 
-  setTimeout(function(){ if (typeof initReviews === 'function') initReviews(item); }, 0);
+  setTimeout(function(){ if (typeof initReviews === 'function') initReviews(item); if (typeof initGoogleReviews === 'function') initGoogleReviews(item); }, 0);
 
   // --- Initialize OpenStreetMap (Leaflet) for the school location ---
   if (window.L) {
@@ -601,6 +608,12 @@ function renderCurrentSchool() {
 .enq-msg.error { background: #f1d4d4; color: #b14747; }
 .enq-msg.success { background: #d9ecdf; color: #2f7a4d; }
 @media (max-width: 520px) { .enq-grid { grid-template-columns: 1fr; } }
+/* Google reviews widget */
+.grev-g { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1px solid #e3e0d8; font-family: Arial, sans-serif; font-weight: 700; font-size: 15px; color: #4285F4; flex: none; }
+.grev-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex: none; }
+.grev-foot { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; margin-top: 14px; }
+.grev-all { font-size: 14px; font-weight: 600; }
+.grev-attr { font-size: 12.5px; color: var(--ink-muted, #8a857a); }
 .rev-section { margin: 40px auto 56px; }
 .rev-h2 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px; margin-bottom: 12px; }
 .rev-summary { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 15px; }
@@ -758,6 +771,32 @@ async function initReviews(item) {
   window.__reviews = rows;
   renderReviews(item);
   injectSchoolJsonLd(item, rows);
+}
+
+async function initGoogleReviews(item) {
+  var sec = document.getElementById('grev-section');
+  if (!sec) return;
+  var row = null;
+  try {
+    var u = window.REVIEWS_URL + '/rest/v1/google_reviews?school_slug=eq.' + encodeURIComponent(item.slug) + '&select=rating,review_count,reviews,maps_url,place_id&limit=1';
+    var r = await fetch(u, { headers: { 'apikey': window.REVIEWS_KEY, 'Authorization': 'Bearer ' + window.REVIEWS_KEY } });
+    if (r.ok) { var arr = await r.json(); row = (arr && arr[0]) || null; }
+  } catch (e) {}
+  if (!row || row.rating == null) return; // no Google listing matched - keep section hidden
+  var sumEl = document.getElementById('grev-summary'), listEl = document.getElementById('grev-list'), footEl = document.getElementById('grev-foot');
+  if (!sumEl || !listEl || !footEl) return;
+  var mapsLink = row.maps_url || (row.place_id ? 'https://www.google.com/maps/place/?q=place_id:' + row.place_id : '');
+  var count = row.review_count || 0;
+  sumEl.innerHTML = '<span class="grev-g" aria-hidden="true">G</span><span class="rev-avg">' + Number(row.rating).toFixed(1) + '</span><span class="rev-stars">' + starRowHTML(Number(row.rating)) + '</span><span class="rev-count">' + count + ' review' + (count === 1 ? '' : 's') + ' on Google</span>';
+  var revs = Array.isArray(row.reviews) ? row.reviews : [];
+  listEl.innerHTML = revs.map(function(rv) {
+    var name = escapeHTML(rv.author || 'Google user');
+    var author = rv.author_url ? '<a href="' + escapeHTML(rv.author_url) + '" target="_blank" rel="noopener nofollow">' + name + '</a>' : name;
+    var avatar = rv.photo ? '<img class="grev-avatar" src="' + escapeHTML(rv.photo) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
+    return '<div class="rev-item"><div class="rev-item-head">' + avatar + '<strong>' + author + '</strong><span class="rev-stars sm">' + starRowHTML(rv.rating || 0) + '</span><span class="rev-date">' + escapeHTML(rv.time_desc || '') + '</span></div>' + (rv.text ? '<p>' + escapeHTML(rv.text) + '</p>' : '') + '</div>';
+  }).join('');
+  footEl.innerHTML = (mapsLink ? '<a class="grev-all" href="' + escapeHTML(mapsLink) + '" target="_blank" rel="noopener nofollow">View all reviews on Google Maps \u2192</a>' : '') + '<span class="grev-attr">Reviews from Google Maps users \u2014 shown alongside, but separate from, verified parent reviews above.</span>';
+  sec.style.display = '';
 }
 
 function renderReviews(item) {
