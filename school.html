@@ -5,6 +5,14 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title id="page-title">School details · Schools Compared</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SF92X1DZJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SF92X1DZJT');
+</script>
 <meta id="page-desc" name="description" content="School profile on Schools Compared. Curriculum, fees, location, and regulator ratings." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -601,10 +609,8 @@ function renderCurrentSchool() {
   </div>
 </div>
 <script>
-// ===== ENQUIRY FORM CONFIG — paste your Supabase credentials below =====
-window.SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';        // e.g. https://abcd1234.supabase.co
-window.SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY';    // long eyJ... JWT
-window.ENQUIRY_NOTIFY_EMAIL = 'future@schoolscompared.org';
+// ===== ENQUIRY FORM CONFIG — Web3Forms (submissions are emailed) =====
+window.WEB3FORMS_ACCESS_KEY = '6ca60ae3-63f6-4734-98d5-201ef4c55b64';
 
 function openEnquiryForm() {
   var slug = (typeof getSlugFromPath === 'function') ? getSlugFromPath() : null;
@@ -644,28 +650,27 @@ async function submitEnquiry(ev) {
   data.school_name = item.n || data.school_name;
   data.user_agent = (navigator.userAgent || '').slice(0, 200);
   
-  if (!window.SUPABASE_URL || window.SUPABASE_URL.indexOf('PASTE_') === 0) {
-    msg.textContent = 'Form is not yet wired to a backend. Your details have been logged to the browser console.';
+  if (!window.WEB3FORMS_ACCESS_KEY) {
+    msg.textContent = 'Form is temporarily unavailable. Please try again later.';
     msg.classList.add('show', 'error');
-    console.log('Enquiry (no backend):', data);
     return;
   }
   
   btn.disabled = true; btn.textContent = 'Submitting…';
   try {
-    var resp = await fetch(window.SUPABASE_URL + '/rest/v1/enquiries', {
+    var payload = Object.assign({
+      access_key: window.WEB3FORMS_ACCESS_KEY,
+      subject: 'New enquiry: ' + (data.school_name || 'school') + ' — ' + data.student_first + ' ' + data.student_last,
+      from_name: 'SchoolsCompared.org'
+    }, data);
+    var resp = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: {
-        'apikey': window.SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + window.SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify(data)
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
     });
-    if (!resp.ok) {
-      var errTxt = await resp.text();
-      throw new Error(resp.status + ': ' + errTxt.slice(0, 200));
+    var result = await resp.json().catch(function(){ return {}; });
+    if (!resp.ok || !result.success) {
+      throw new Error((result && result.message) || ('Error ' + resp.status));
     }
     msg.textContent = 'Thank you — your enquiry has been received. The school will be in touch.';
     msg.classList.add('show', 'success');
