@@ -454,8 +454,33 @@ function buildPage(item) {
           </div>
         </aside>
       </div>
+
+      <section class="rev-section container" id="rev-section">
+        <h2 class="rev-h2">Parent reviews</h2>
+        <div class="rev-summary" id="rev-summary"></div>
+        <div class="rev-list" id="rev-list"></div>
+        <div class="rev-form-card">
+          <h3>Rate this school</h3>
+          <p class="rev-sub">Are you a parent at this school? Share your experience to help other families.</p>
+          <div class="rev-msg" id="rev-msg"></div>
+          <form id="rev-form" onsubmit="submitParentReview(event)">
+            <div class="rev-stars-row">
+              <span id="rev-stars-input">
+                <button type="button" class="rev-star-btn" onclick="setRevRating(1)" aria-label="1 star">★</button><button type="button" class="rev-star-btn" onclick="setRevRating(2)" aria-label="2 stars">★</button><button type="button" class="rev-star-btn" onclick="setRevRating(3)" aria-label="3 stars">★</button><button type="button" class="rev-star-btn" onclick="setRevRating(4)" aria-label="4 stars">★</button><button type="button" class="rev-star-btn" onclick="setRevRating(5)" aria-label="5 stars">★</button>
+              </span>
+              <span class="rev-rating-label" id="rev-rating-label"></span>
+            </div>
+            <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;border:0;padding:0" aria-hidden="true">
+            <input class="rev-input" name="parent_name" placeholder="Your name *" required maxlength="80">
+            <textarea class="rev-input" name="comment" placeholder="Share your experience as a parent… (min 10 characters) *" required minlength="10" maxlength="2000" rows="4"></textarea>
+            <button type="submit" class="rev-submit" id="rev-submit">Submit review</button>
+          </form>
+        </div>
+      </section>
     </main>
   `;
+
+  initReviews(item);
 
   // --- Initialize OpenStreetMap (Leaflet) for the school location ---
   if (window.L) {
@@ -575,6 +600,32 @@ function renderCurrentSchool() {
 .enq-msg.error { background: #f1d4d4; color: #b14747; }
 .enq-msg.success { background: #d9ecdf; color: #2f7a4d; }
 @media (max-width: 520px) { .enq-grid { grid-template-columns: 1fr; } }
+.rev-section { margin: 40px auto 56px; }
+.rev-h2 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px; margin-bottom: 12px; }
+.rev-summary { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 15px; }
+.rev-avg { font-size: 26px; font-weight: 700; }
+.rev-stars { color: #f5b301; font-size: 19px; letter-spacing: 2px; }
+.rev-stars.sm { font-size: 14px; }
+.rev-star { color: #d9d5cc; } .rev-star.on { color: #f5b301; }
+.rev-count, .rev-date { color: #4a5159; font-size: 13px; }
+.rev-none { color: #4a5159; font-size: 14px; }
+.rev-item { background: #fff; border: 1px solid #e7e3da; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.rev-item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.rev-item p { font-size: 14px; color: #2b3138; margin: 0; }
+.rev-form-card { background: #fff; border: 1px solid #e7e3da; border-radius: 14px; padding: 20px; margin-top: 22px; max-width: 640px; }
+.rev-form-card h3 { margin: 0 0 4px; }
+.rev-sub { color: #4a5159; font-size: 13px; margin: 0 0 14px; }
+.rev-stars-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.rev-star-btn { background: none; border: none; font-size: 26px; color: #d9d5cc; cursor: pointer; padding: 0 2px; line-height: 1; }
+.rev-star-btn.on { color: #f5b301; }
+.rev-rating-label { font-size: 13px; color: #4a5159; }
+.rev-input { display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; padding: 10px 12px; border: 1px solid #d6d3cc; border-radius: 8px; margin-bottom: 10px; }
+.rev-submit { background: #0f1419; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+.rev-submit:disabled { opacity: .5; cursor: wait; }
+.rev-msg { display: none; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+.rev-msg.show { display: block; }
+.rev-msg.error { background: #f1d4d4; color: #b14747; }
+.rev-msg.success { background: #d9ecdf; color: #2f7a4d; }
 </style>
 <div class="enq-overlay" id="enq-overlay" onclick="if(event.target===this)closeEnquiryForm()">
   <div class="enq-modal">
@@ -611,6 +662,10 @@ function renderCurrentSchool() {
 <script>
 // ===== ENQUIRY FORM CONFIG — Web3Forms (submissions are emailed) =====
 window.WEB3FORMS_ACCESS_KEY = '6ca60ae3-63f6-4734-98d5-201ef4c55b64';
+
+// ===== PARENT REVIEWS CONFIG — Supabase (anon key is public by design; table is RLS-protected) =====
+window.REVIEWS_URL = 'https://cpwyoglqgojygnaxviqd.supabase.co';
+window.REVIEWS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwd3lvZ2xxZ29qeWduYXh2aXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxODY3OTUsImV4cCI6MjA5Mjc2Mjc5NX0.MNkJieAWQBJ8PdDooLbg1-B930jr8lPgMwlQBkRtRHg';
 
 function openEnquiryForm() {
   var slug = (typeof getSlugFromPath === 'function') ? getSlugFromPath() : null;
@@ -681,6 +736,117 @@ async function submitEnquiry(ev) {
     msg.classList.add('show', 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Submit enquiry';
+  }
+}
+
+// ===== PARENT REVIEWS =====
+function starRowHTML(rating) {
+  var out = ''; var full = Math.round(rating);
+  for (var i = 1; i <= 5; i++) out += '<span class="rev-star' + (i <= full ? ' on' : '') + '">\u2605</span>';
+  return out;
+}
+
+async function initReviews(item) {
+  if (!document.getElementById('rev-list')) return;
+  var rows = [];
+  try {
+    var u = window.REVIEWS_URL + '/rest/v1/school_reviews?school_slug=eq.' + encodeURIComponent(item.slug) + '&approved=eq.true&select=parent_name,rating,comment,created_at&order=created_at.desc&limit=50';
+    var r = await fetch(u, { headers: { 'apikey': window.REVIEWS_KEY, 'Authorization': 'Bearer ' + window.REVIEWS_KEY } });
+    if (r.ok) rows = await r.json();
+  } catch (e) {}
+  window.__reviews = rows;
+  renderReviews(item);
+  injectSchoolJsonLd(item, rows);
+}
+
+function renderReviews(item) {
+  var rows = window.__reviews || [];
+  var sumEl = document.getElementById('rev-summary'), listEl = document.getElementById('rev-list');
+  if (!sumEl || !listEl) return;
+  if (rows.length) {
+    var avg = rows.reduce(function(a, b) { return a + b.rating; }, 0) / rows.length;
+    sumEl.innerHTML = '<span class="rev-avg">' + (Math.round(avg * 10) / 10).toFixed(1) + '</span><span class="rev-stars">' + starRowHTML(avg) + '</span><span class="rev-count">' + rows.length + ' parent review' + (rows.length > 1 ? 's' : '') + '</span>';
+    listEl.innerHTML = rows.map(function(rv) {
+      var ds = '';
+      try { ds = new Date(rv.created_at).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) {}
+      return '<div class="rev-item"><div class="rev-item-head"><strong>' + escapeHTML(rv.parent_name) + '</strong><span class="rev-stars sm">' + starRowHTML(rv.rating) + '</span><span class="rev-date">' + ds + '</span></div><p>' + escapeHTML(rv.comment) + '</p></div>';
+    }).join('');
+  } else {
+    sumEl.innerHTML = '<span class="rev-none">No parent reviews yet \u2014 be the first to rate this school.</span>';
+    listEl.innerHTML = '';
+  }
+}
+
+function injectSchoolJsonLd(item, rows) {
+  var old = document.getElementById('school-jsonld'); if (old) old.remove();
+  var region = (item.em || '').split(' (')[0];
+  var desc = (item.c ? item.c + ' curriculum ' : '') + (item.t || 'School').toLowerCase() + ' in ' + (item.ar || '') + ', ' + region + ', United Arab Emirates.';
+  if (item.r && item.r !== 'No rating') desc += ' ' + item.auth + ' inspection rating: ' + item.r + '.';
+  if (item.fr) desc += ' Annual fees ' + item.fr.replace(/\u202F/g, ' ') + '.';
+  var ld = {
+    '@context': 'https://schema.org',
+    '@type': 'School',
+    'name': item.n,
+    'url': 'https://www.schoolscompared.org/school/' + item.slug,
+    'description': desc,
+    'address': { '@type': 'PostalAddress', 'addressLocality': item.ar || region, 'addressRegion': region, 'addressCountry': 'AE' }
+  };
+  if (item.f && /^\d{4}$/.test(String(item.f))) ld.foundingDate = String(item.f);
+  if (rows && rows.length) {
+    var avg = rows.reduce(function(a, b) { return a + b.rating; }, 0) / rows.length;
+    ld.aggregateRating = { '@type': 'AggregateRating', 'ratingValue': Math.round(avg * 10) / 10, 'reviewCount': rows.length, 'bestRating': 5, 'worstRating': 1 };
+    ld.review = rows.slice(0, 5).map(function(rv) {
+      return { '@type': 'Review', 'author': { '@type': 'Person', 'name': rv.parent_name }, 'datePublished': String(rv.created_at || '').slice(0, 10), 'reviewBody': rv.comment, 'reviewRating': { '@type': 'Rating', 'ratingValue': rv.rating, 'bestRating': 5, 'worstRating': 1 } };
+    });
+  }
+  var bc = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+    { '@type': 'ListItem', 'position': 1, 'name': 'Schools Compared', 'item': 'https://www.schoolscompared.org/' },
+    { '@type': 'ListItem', 'position': 2, 'name': region, 'item': 'https://www.schoolscompared.org/?em=' + encodeURIComponent(item.em || '') },
+    { '@type': 'ListItem', 'position': 3, 'name': item.n, 'item': 'https://www.schoolscompared.org/school/' + item.slug }
+  ]};
+  var sc = document.createElement('script'); sc.type = 'application/ld+json'; sc.id = 'school-jsonld';
+  sc.textContent = JSON.stringify([ld, bc]);
+  document.head.appendChild(sc);
+}
+
+var __revRating = 0;
+function setRevRating(n) {
+  __revRating = n;
+  var btns = document.querySelectorAll('#rev-stars-input .rev-star-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', i < n);
+  var lbl = document.getElementById('rev-rating-label'); if (lbl) lbl.textContent = n + '/5';
+}
+
+async function submitParentReview(ev) {
+  ev.preventDefault();
+  var f = ev.target, msg = document.getElementById('rev-msg'), btn = document.getElementById('rev-submit');
+  msg.className = 'rev-msg'; msg.textContent = '';
+  if (f.website && f.website.value) return;
+  var slug = (typeof getSlugFromPath === 'function') ? getSlugFromPath() : null;
+  var item = (slug && BY_SLUG[slug]) ? BY_SLUG[slug] : null;
+  if (!item) return;
+  var name = (f.parent_name.value || '').trim(), comment = (f.comment.value || '').trim();
+  if (!__revRating) { msg.textContent = 'Please select a star rating.'; msg.classList.add('show', 'error'); return; }
+  if (name.length < 1 || comment.length < 10) { msg.textContent = 'Please add your name and a comment of at least 10 characters.'; msg.classList.add('show', 'error'); return; }
+  btn.disabled = true; btn.textContent = 'Submitting\u2026';
+  try {
+    var resp = await fetch(window.REVIEWS_URL + '/rest/v1/school_reviews', {
+      method: 'POST',
+      headers: { 'apikey': window.REVIEWS_KEY, 'Authorization': 'Bearer ' + window.REVIEWS_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ school_slug: item.slug, school_name: item.n, parent_name: name.slice(0, 80), rating: __revRating, comment: comment.slice(0, 2000) })
+    });
+    if (!resp.ok) { var t = await resp.text(); throw new Error(t.slice(0, 160)); }
+    var added = [];
+    try { added = await resp.json(); } catch (e) {}
+    window.__reviews = (added || []).concat(window.__reviews || []);
+    renderReviews(item);
+    injectSchoolJsonLd(item, window.__reviews);
+    f.reset(); setRevRating(0);
+    msg.textContent = 'Thank you \u2014 your review is now live.'; msg.classList.add('show', 'success');
+  } catch (e) {
+    msg.textContent = 'Could not submit review: ' + e.message; msg.classList.add('show', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit review';
   }
 }
 </script>
