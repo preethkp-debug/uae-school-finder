@@ -480,7 +480,7 @@ function buildPage(item) {
     </main>
   `;
 
-  initReviews(item);
+  setTimeout(function(){ if (typeof initReviews === 'function') initReviews(item); }, 0);
 
   // --- Initialize OpenStreetMap (Leaflet) for the school location ---
   if (window.L) {
